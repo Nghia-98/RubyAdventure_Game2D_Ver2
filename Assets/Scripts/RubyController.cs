@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 
 public class RubyController : MonoBehaviour {
@@ -36,6 +37,11 @@ public class RubyController : MonoBehaviour {
 
   public AudioClip hitSound;
 
+  // Ruby input action property
+  RubyInputAction rubyInputAction;
+
+  Vector2 currentInput;
+
   void Start() {
     //Get Rigidbody2D component
     rb2d = GetComponent<Rigidbody2D>();
@@ -44,12 +50,20 @@ public class RubyController : MonoBehaviour {
 
     // Setup Health
     currentHealth = maxHealth;
+
+    // Input
+    rubyInputAction = new RubyInputAction();
+    rubyInputAction.Ruby.Enable();
+
+    // Input actions
+    rubyInputAction.Ruby.Launch.performed += Launch;
+    rubyInputAction.Ruby.Movenment.performed += OnMovenment;
+    rubyInputAction.Ruby.Movenment.canceled += OnMovenment;
+    rubyInputAction.Ruby.Talk.performed += TalkingWithJambi;
   }
 
   // Update is called once per frame
   void Update() {
-    horizontal = Input.GetAxis("Horizontal");
-    vertical = Input.GetAxis("Vertical");
 
     if (isInvincible) {
       invincibleTimer -= Time.deltaTime;
@@ -58,7 +72,22 @@ public class RubyController : MonoBehaviour {
       }
     }
 
-    Vector2 move = new Vector2(horizontal, vertical);
+    if (Input.GetKeyDown(KeyCode.X)) {
+      
+    }
+  }
+
+  void FixedUpdate() {
+
+    if (currentInput.magnitude > 0.01) {
+      Vector2 position = rb2d.position;
+      position = position + currentInput * speed * Time.deltaTime;
+
+      rb2d.MovePosition(position);
+    }
+
+
+    Vector2 move = new Vector2(currentInput.x, currentInput.y);
     if (!Mathf.Approximately(move.x, 0.0f) || !Mathf.Approximately(move.y, 0.0f)) {
       lookDirection.Set(move.x, move.y);
       lookDirection.Normalize();
@@ -67,34 +96,6 @@ public class RubyController : MonoBehaviour {
     animator.SetFloat("Look X", lookDirection.x);
     animator.SetFloat("Look Y", lookDirection.y);
     animator.SetFloat("Speed", move.magnitude);
-
-    if (Input.GetKeyDown(KeyCode.Space)) {
-      Launch();
-    }
-
-    if (Input.GetKeyDown(KeyCode.X)) {
-      RaycastHit2D hit = Physics2D.Raycast(transform.position, lookDirection, 1.5f, LayerMask.GetMask("NPC"));
-
-      if (hit.collider != null) {
-        Debug.Log("Hit " + hit.collider.name);
-
-        MyNPC character = hit.collider.GetComponent<MyNPC>();
-        if (character != null) {
-          character.showDialogBox();
-        }
-      }
-    }
-  }
-
-  void FixedUpdate() {
-    float horizontal = Input.GetAxis("Horizontal");
-    float vertical = Input.GetAxis("Vertical");
-
-    Vector2 position = transform.position;
-    position.x += speed * horizontal * Time.deltaTime;
-    position.y += speed * vertical * Time.deltaTime;
-
-    rb2d.MovePosition(position);
   }
 
   public void ChangeHealth(int amount) {
@@ -112,16 +113,43 @@ public class RubyController : MonoBehaviour {
     UIHealthBar.instance.SetValue(currentHealth / (float)maxHealth);
   }
 
-  void Launch() {
-    GameObject projectileObject = Instantiate(projectilePrefab, rb2d.position + Vector2.up * 0.5f, Quaternion.identity);
-    Projectile projectile = projectileObject.GetComponent<Projectile>();
+  void Launch(InputAction.CallbackContext context) {
+    if (context.performed) {
+      GameObject projectileObject = Instantiate(projectilePrefab, rb2d.position + Vector2.up * 0.5f, Quaternion.identity);
+      Projectile projectile = projectileObject.GetComponent<Projectile>();
 
-    projectile.Launch(lookDirection, 300f);
-    animator.SetTrigger("Launch");
+      projectile.Launch(lookDirection, 300f);
+      animator.SetTrigger("Launch");
+    }
   }
 
   public void PlaySound(AudioClip clip) {
     Debug.Log("Has Eat");
     audioSource.PlayOneShot(clip);
+  }
+
+  void OnMovenment(InputAction.CallbackContext context) {
+    if (context.performed) {
+      currentInput = context.ReadValue<Vector2>();
+    }
+    if (context.canceled) {
+      currentInput = Vector2.zero;
+      Debug.Log("canceled " + currentInput);
+    }
+  }
+
+  void TalkingWithJambi(InputAction.CallbackContext context) {
+    if(context.performed) {
+      RaycastHit2D hit = Physics2D.Raycast(transform.position, lookDirection, 1.5f, LayerMask.GetMask("NPC"));
+
+      if (hit.collider != null) {
+        Debug.Log("Hit " + hit.collider.name);
+
+        MyNPC character = hit.collider.GetComponent<MyNPC>();
+        if (character != null) {
+          character.showDialogBox();
+        }
+      }
+    }
   }
 }
