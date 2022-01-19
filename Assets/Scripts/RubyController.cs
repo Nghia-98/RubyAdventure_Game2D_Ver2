@@ -32,6 +32,7 @@ public class RubyController : MonoBehaviour {
   float invincibleTimer;
 
   public GameObject projectilePrefab;
+  public GameObject pauseMenu;
 
   AudioSource audioSource;
 
@@ -60,6 +61,7 @@ public class RubyController : MonoBehaviour {
     rubyInputAction.Ruby.Movenment.performed += OnMovenment;
     rubyInputAction.Ruby.Movenment.canceled += OnMovenment;
     rubyInputAction.Ruby.Talk.performed += TalkingWithJambi;
+    rubyInputAction.Ruby.PauseGame.performed += OnPauseGame;
   }
 
   // Update is called once per frame
@@ -73,7 +75,7 @@ public class RubyController : MonoBehaviour {
     }
 
     if (Input.GetKeyDown(KeyCode.X)) {
-      
+
     }
   }
 
@@ -139,7 +141,7 @@ public class RubyController : MonoBehaviour {
   }
 
   void TalkingWithJambi(InputAction.CallbackContext context) {
-    if(context.performed) {
+    if (context.performed) {
       RaycastHit2D hit = Physics2D.Raycast(transform.position, lookDirection, 1.5f, LayerMask.GetMask("NPC"));
 
       if (hit.collider != null) {
@@ -150,6 +152,16 @@ public class RubyController : MonoBehaviour {
           character.showDialogBox();
         }
       }
+    }
+  }
+
+
+  void OnPauseGame(InputAction.CallbackContext context) {
+    if (context.performed) {
+      MyGameManager.Instance.PauseGame();
+
+      // Show Pause Menu
+      pauseMenu.SetActive(true);
     }
   }
 }

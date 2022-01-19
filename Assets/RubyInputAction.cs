@@ -53,6 +53,15 @@ public partial class @RubyInputAction : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PauseGame"",
+                    ""type"": ""Button"",
+                    ""id"": ""e9018cba-472d-42fc-bb55-2c9cb8294972"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -143,6 +152,17 @@ public partial class @RubyInputAction : IInputActionCollection2, IDisposable
                     ""action"": ""Talk"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""edacd562-4bec-46d4-ada9-66932ce716b0"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PauseGame"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -154,6 +174,7 @@ public partial class @RubyInputAction : IInputActionCollection2, IDisposable
         m_Ruby_Movenment = m_Ruby.FindAction("Movenment", throwIfNotFound: true);
         m_Ruby_Launch = m_Ruby.FindAction("Launch", throwIfNotFound: true);
         m_Ruby_Talk = m_Ruby.FindAction("Talk", throwIfNotFound: true);
+        m_Ruby_PauseGame = m_Ruby.FindAction("PauseGame", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -216,6 +237,7 @@ public partial class @RubyInputAction : IInputActionCollection2, IDisposable
     private readonly InputAction m_Ruby_Movenment;
     private readonly InputAction m_Ruby_Launch;
     private readonly InputAction m_Ruby_Talk;
+    private readonly InputAction m_Ruby_PauseGame;
     public struct RubyActions
     {
         private @RubyInputAction m_Wrapper;
@@ -223,6 +245,7 @@ public partial class @RubyInputAction : IInputActionCollection2, IDisposable
         public InputAction @Movenment => m_Wrapper.m_Ruby_Movenment;
         public InputAction @Launch => m_Wrapper.m_Ruby_Launch;
         public InputAction @Talk => m_Wrapper.m_Ruby_Talk;
+        public InputAction @PauseGame => m_Wrapper.m_Ruby_PauseGame;
         public InputActionMap Get() { return m_Wrapper.m_Ruby; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -241,6 +264,9 @@ public partial class @RubyInputAction : IInputActionCollection2, IDisposable
                 @Talk.started -= m_Wrapper.m_RubyActionsCallbackInterface.OnTalk;
                 @Talk.performed -= m_Wrapper.m_RubyActionsCallbackInterface.OnTalk;
                 @Talk.canceled -= m_Wrapper.m_RubyActionsCallbackInterface.OnTalk;
+                @PauseGame.started -= m_Wrapper.m_RubyActionsCallbackInterface.OnPauseGame;
+                @PauseGame.performed -= m_Wrapper.m_RubyActionsCallbackInterface.OnPauseGame;
+                @PauseGame.canceled -= m_Wrapper.m_RubyActionsCallbackInterface.OnPauseGame;
             }
             m_Wrapper.m_RubyActionsCallbackInterface = instance;
             if (instance != null)
@@ -254,6 +280,9 @@ public partial class @RubyInputAction : IInputActionCollection2, IDisposable
                 @Talk.started += instance.OnTalk;
                 @Talk.performed += instance.OnTalk;
                 @Talk.canceled += instance.OnTalk;
+                @PauseGame.started += instance.OnPauseGame;
+                @PauseGame.performed += instance.OnPauseGame;
+                @PauseGame.canceled += instance.OnPauseGame;
             }
         }
     }
@@ -263,5 +292,6 @@ public partial class @RubyInputAction : IInputActionCollection2, IDisposable
         void OnMovenment(InputAction.CallbackContext context);
         void OnLaunch(InputAction.CallbackContext context);
         void OnTalk(InputAction.CallbackContext context);
+        void OnPauseGame(InputAction.CallbackContext context);
     }
 }
